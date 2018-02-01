@@ -38,7 +38,7 @@
     if (!app.selectedCities) {
       app.selectedCities = [];
     }
-    app.getWeatherNowOWM(key, label)
+    app.getWeatherNowOWM(key)
     app.selectedCities.push({key: key, label: label});
     app.saveSelectedCities();
     app.toggleAddDialog(false);
@@ -68,21 +68,14 @@
   // Updates a weather card with the latest weather forecast. If the card
   // doesn't already exist, it's cloned from the template.
   app.updateForecastCard = function(data) {
-    var dataLastUpdated = new Date(data.created);
-    var sunrise = data.channel.astronomy.sunrise;
-    var sunset = data.channel.astronomy.sunset;
-    var current = data.channel.item.condition;
-    var humidity = data.channel.atmosphere.humidity;
-    var wind = data.channel.wind;
-
     var card = app.visibleCards[data.key];
     if (!card) {
       card = app.cardTemplate.cloneNode(true);
       card.classList.remove('cardTemplate');
-      card.querySelector('.location').textContent = data.label;
+      card.querySelector('.location').textContent = data.name;
       card.removeAttribute('hidden');
       app.container.appendChild(card);
-      app.visibleCards[data.key] = card;
+      app.visibleCards[data.id] = card;
     }
 
     // Verifies the data provide is newer than what's already visible
@@ -93,40 +86,48 @@
     if (cardLastUpdated) {
       cardLastUpdated = new Date(cardLastUpdated);
       // Bail if the card has more recent data then the data
-      if (dataLastUpdated.getTime() < cardLastUpdated.getTime()) {
+      if (data.dt < cardLastUpdated.getTime()) {
         return;
       }
     }
-    cardLastUpdatedElem.textContent = data.created;
-
-    card.querySelector('.description').textContent = current.text;
-    card.querySelector('.date').textContent = current.date;
-    card.querySelector('.current .icon').classList.add(app.getIconClass(current.code));
+ 
+    var localeDate = 'ro-RO';
+    cardLastUpdatedElem.textContent = new Date(data.dt*1000);
+    card.querySelector('.description').textContent = data.weather[0].description;
+    card.querySelector('.date').textContent = new Date(data.dt*1000)
+    .toLocaleDateString(localeDate, { weekday: 'short', month: 'short', day: 'numeric' });
+    card.querySelector('.current .icon').classList.add(app.getIconClass(data.weather[0].icon));
     card.querySelector('.current .temperature .value').textContent =
-      Math.round(current.temp);
-    card.querySelector('.current .sunrise').textContent = sunrise;
-    card.querySelector('.current .sunset').textContent = sunset;
+      Math.round(data.main.temp);
+    var optionsDate = { hour : 'numeric', minute: 'numeric', weekday : 'narrow'};
+    card.querySelector('.current .sunrise').textContent = new Date(data.sys.sunrise*1000)
+    // .format('HH:m');
+    .toLocaleDateString(localeDate, optionsDate);
+    card.querySelector('.current .sunset').textContent = new Date(data.sys.sunset*1000)
+    .toLocaleDateString(localeDate, optionsDate);
     card.querySelector('.current .humidity').textContent =
-      Math.round(humidity) + '%';
+      Math.round(data.main.humidity) + '%';
     card.querySelector('.current .wind .value').textContent =
-      Math.round(wind.speed);
-    card.querySelector('.current .wind .direction').textContent = wind.direction;
-    var nextDays = card.querySelectorAll('.future .oneday');
-    var today = new Date();
-    today = today.getDay();
-    for (var i = 0; i < 7; i++) {
-      var nextDay = nextDays[i];
-      var daily = data.channel.item.forecast[i];
-      if (daily && nextDay) {
-        nextDay.querySelector('.date').textContent =
-          app.daysOfWeek[(i + today) % 7];
-        nextDay.querySelector('.icon').classList.add(app.getIconClass(daily.code));
-        nextDay.querySelector('.temp-high .value').textContent =
-          Math.round(daily.high);
-        nextDay.querySelector('.temp-low .value').textContent =
-          Math.round(daily.low);
-      }
-    }
+      Math.round(data.wind.speed);
+    card.querySelector('.current .wind .direction').textContent = data.wind.deg;
+ 
+    // var nextDays = card.querySelectorAll('.future .oneday');
+    // var today = new Date();
+    // today = today.getDay();
+    // for (var i = 0; i < 7; i++) {
+    //   var nextDay = nextDays[i];
+    //   var daily = data.channel.item.forecast[i];
+    //   if (daily && nextDay) {
+    //     nextDay.querySelector('.date').textContent =
+    //       app.daysOfWeek[(i + today) % 7];
+    //     nextDay.querySelector('.icon').classList.add(app.getIconClass(daily.code));
+    //     nextDay.querySelector('.temp-high .value').textContent =
+    //       Math.round(daily.high);
+    //     nextDay.querySelector('.temp-low .value').textContent =
+    //       Math.round(daily.low);
+    //   }
+    // }
+
     if (app.isLoading) {
       app.spinner.setAttribute('hidden', true);
       app.container.removeAttribute('hidden');
@@ -141,12 +142,16 @@
    *
    ****************************************************************************/
 
-  app.getWeatherNowOWM = function(key, label) {
+  app.getWeatherNowOWM = function(key) {
     var url = 'http://api.openweathermap.org/data/2.5/weather?mode=json' 
     + '&id=' + key
     + '&units=metric' 
     + '&lang=en'
     + '&APPID=' + 'd53bff8f3256eaf090be3c94964b0cb8';
+    // http://api.openweathermap.org/data/2.5/weather?mode=json&id=680332&units=metric&lang=en&APPID=d53bff8f3256eaf090be3c94964b0cb8
+    // https://query.yahooapis.com/v1/public/yql?format=json&q=select%20*%20from%20weather.forecast%20where%20woeid=2459115
+
+
     // TODO add cache logic here
     if ('caches' in window) {
       /*
@@ -156,13 +161,7 @@
        */
       caches.match(url).then(function(response) {
         if (response) {
-          response.json().then(function updateFromCache(json) {
-            var results = json.query.results;
-            results.key = key;
-            results.label = label;
-            results.created = json.query.created;
-            app.updateForecastCard(results);
-          });
+          response.json().then( app.updateForecastCard(results) );
         }
       });
     }
@@ -171,11 +170,8 @@
     request.onreadystatechange = function() {
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
-          var response = JSON.parse(request.response);
-          var results = response.query.results;
-          results.key = key;
-          results.label = label;
-          results.created = response.query.created;
+          var results = JSON.parse(request.response);
+          results.created = results.dt;
           app.updateForecastCard(results);
         }
       } else {
@@ -191,7 +187,7 @@
   app.updateForecasts = function() {
     var keys = Object.keys(app.visibleCards);
     keys.forEach(function(key) {
-      app.getWeatherNowOWM(key, label)
+      app.getWeatherNowOWM(key)
     });
   };
 
@@ -272,40 +268,48 @@
    * discussion.
    */
   var initialWeatherForecast = {
-    key: '680332',
-    label: 'New York, NY',
-    created: '2016-07-22T01:00:00Z',
-    channel: {
-      astronomy: {
-        sunrise: "5:43 am",
-        sunset: "8:21 pm"
+      "coord": {
+      "lon": 23.8,
+      "lat": 44.32
       },
-      item: {
-        condition: {
-          text: "Windy",
-          date: "Thu, 21 Jul 2016 09:00 PM EDT",
-          temp: 56,
-          code: 24
-        },
-        forecast: [
-          {code: 44, high: 86, low: 70},
-          {code: 44, high: 94, low: 73},
-          {code: 4, high: 95, low: 78},
-          {code: 24, high: 75, low: 89},
-          {code: 24, high: 89, low: 77},
-          {code: 44, high: 92, low: 79},
-          {code: 44, high: 89, low: 77}
-        ]
-      },
-      atmosphere: {
-        humidity: 56
-      },
-      wind: {
-        speed: 25,
-        direction: 195
+      "weather": [
+      {
+      "id": 800,
+      "main": "Clear",
+      "description": "clear sky",
+      "icon": "01d"
       }
-    }
-  };
+      ],
+      "base": "stations",
+      "main": {
+      "temp": 7,
+      "pressure": 1015,
+      "humidity": 56,
+      "temp_min": 7,
+      "temp_max": 7
+      },
+      "visibility": 10000,
+      "wind": {
+      "speed": 2.6,
+      "deg": 160
+      },
+      "clouds": {
+      "all": 0
+      },
+      "dt": 1517481000,
+      "sys": {
+      "type": 1,
+      "id": 5991,
+      "message": 0.0036,
+      "country": "RO",
+      "sunrise": 1517463761,
+      "sunset": 1517499282
+      },
+      "id": 680332,
+      "name": "Craiova",
+      "cod": 200
+      };
+
   // TODO uncomment line below to test app with fake data
   // app.updateForecastCard(initialWeatherForecast);
 
@@ -325,7 +329,7 @@
   if (app.selectedCities) {
     app.selectedCities = JSON.parse(app.selectedCities);
     app.selectedCities.forEach(function(city) {
-      app.getWeatherNowOWM(city.key, city.label)
+      app.getWeatherNowOWM(city.key)
     });
   } else {
     /* The user is using the app for the first time, or the user has not
@@ -335,7 +339,7 @@
      */
     app.updateForecastCard(initialWeatherForecast);
     app.selectedCities = [
-      {key: initialWeatherForecast.key, label: initialWeatherForecast.label}
+      {key: initialWeatherForecast.id, label: initialWeatherForecast.name}
     ];
     app.saveSelectedCities();
   }
