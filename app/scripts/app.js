@@ -38,7 +38,7 @@
     if (!app.selectedCities) {
       app.selectedCities = [];
     }
-    app.getForecast(key, label);
+    app.getWeatherNowOWM(key, label)
     app.selectedCities.push({key: key, label: label});
     app.saveSelectedCities();
     app.toggleAddDialog(false);
@@ -141,18 +141,12 @@
    *
    ****************************************************************************/
 
-  /*
-   * Gets a forecast for a specific city and updates the card with the data.
-   * getForecast() first checks if the weather data is in the cache. If so,
-   * then it gets that data and populates the card with the cached data.
-   * Then, getForecast() goes to the network for fresh data. If the network
-   * request goes through, then the card gets updated a second time with the
-   * freshest data.
-   */
-  app.getForecast = function(key, label) {
-    var statement = 'select * from weather.forecast where woeid=' + key;
-    var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
-        statement;
+  app.getWeatherNowOWM = function(key, label) {
+    var url = 'http://api.openweathermap.org/data/2.5/weather?mode=json' 
+    + '&id=' + key
+    + '&units=metric' 
+    + '&lang=en'
+    + '&APPID=' + 'd53bff8f3256eaf090be3c94964b0cb8';
     // TODO add cache logic here
     if ('caches' in window) {
       /*
@@ -197,7 +191,7 @@
   app.updateForecasts = function() {
     var keys = Object.keys(app.visibleCards);
     keys.forEach(function(key) {
-      app.getForecast(key);
+      app.getWeatherNowOWM(key, label)
     });
   };
 
@@ -278,7 +272,7 @@
    * discussion.
    */
   var initialWeatherForecast = {
-    key: '2459115',
+    key: '680332',
     label: 'New York, NY',
     created: '2016-07-22T01:00:00Z',
     channel: {
@@ -331,7 +325,7 @@
   if (app.selectedCities) {
     app.selectedCities = JSON.parse(app.selectedCities);
     app.selectedCities.forEach(function(city) {
-      app.getForecast(city.key, city.label);
+      app.getWeatherNowOWM(city.key, city.label)
     });
   } else {
     /* The user is using the app for the first time, or the user has not

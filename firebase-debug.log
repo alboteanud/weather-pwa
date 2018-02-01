@@ -40,3 +40,86 @@
 [info] +  hosting: Local server: http://localhost:5000
 
 [info] Shutting down...
+[debug] [2018-01-31T11:29:02.235Z] ----------------------------------------------------------------------
+[debug] [2018-01-31T11:29:02.240Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\ancas\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase serve
+[debug] [2018-01-31T11:29:02.240Z] CLI Version:   3.17.4
+[debug] [2018-01-31T11:29:02.240Z] Platform:      win32
+[debug] [2018-01-31T11:29:02.240Z] Node Version:  v8.9.4
+[debug] [2018-01-31T11:29:02.240Z] Time:          Wed Jan 31 2018 13:29:02 GMT+0200 (GTB Standard Time)
+[debug] [2018-01-31T11:29:02.240Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-01-31T11:29:02.365Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-01-31T11:29:02.365Z] > authorizing via signed-in user
+[debug] [2018-01-31T11:29:02.381Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2018-01-31T11:29:02.381Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ { refresh_token: '1/nb4pvDbdSfCEtEiQs0xTYlyje7NXj2nadMCDFmUgRBI',
+  client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
+  client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+  grant_type: 'refresh_token',
+  scope: 'email https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloudplatformprojects.readonly https://www.googleapis.com/auth/firebase openid' } 
+ Wed Jan 31 2018 13:29:02 GMT+0200 (GTB Standard Time)
+[debug] [2018-01-31T11:29:02.615Z] <<< HTTP RESPONSE 200
+[debug] [2018-01-31T11:29:02.684Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/weather-pwa-507f4  
+  
+ Wed Jan 31 2018 13:29:02 GMT+0200 (GTB Standard Time)
+[debug] [2018-01-31T11:29:03.690Z] <<< HTTP RESPONSE 200
+[debug] [2018-01-31T11:29:03.690Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/weather-pwa-507f4/tokens  
+  
+ Wed Jan 31 2018 13:29:03 GMT+0200 (GTB Standard Time)
+[debug] [2018-01-31T11:29:04.381Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Serving from 'C:\Users\ancas\web\weather'...
+[info] 
+[debug] [2018-01-31T11:29:04.381Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/weather-pwa-507f4  
+  
+ Wed Jan 31 2018 13:29:04 GMT+0200 (GTB Standard Time)
+[debug] [2018-01-31T11:29:05.256Z] <<< HTTP RESPONSE 200
+[debug] [2018-01-31T11:29:05.256Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/112467213206/clients/_:getWebAppConfig  
+  
+ Wed Jan 31 2018 13:29:05 GMT+0200 (GTB Standard Time)
+[debug] [2018-01-31T11:29:05.895Z] <<< HTTP RESPONSE 200
+[info] i  hosting: Serving hosting files from: app
+[info] +  hosting: Local server: http://localhost:5000
+
+[debug] [2018-02-01T09:25:10.799Z] ----------------------------------------------------------------------
+[debug] [2018-02-01T09:25:10.801Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\ancas\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase serve
+[debug] [2018-02-01T09:25:10.802Z] CLI Version:   3.17.4
+[debug] [2018-02-01T09:25:10.802Z] Platform:      win32
+[debug] [2018-02-01T09:25:10.802Z] Node Version:  v8.9.4
+[debug] [2018-02-01T09:25:10.802Z] Time:          Thu Feb 01 2018 11:25:10 GMT+0200 (GTB Standard Time)
+[debug] [2018-02-01T09:25:10.802Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-02-01T09:25:10.892Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-02-01T09:25:10.893Z] > authorizing via signed-in user
+[debug] [2018-02-01T09:25:10.894Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2018-02-01T09:25:10.894Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ { refresh_token: '1/nb4pvDbdSfCEtEiQs0xTYlyje7NXj2nadMCDFmUgRBI',
+  client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
+  client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+  grant_type: 'refresh_token',
+  scope: 'email https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloudplatformprojects.readonly https://www.googleapis.com/auth/firebase openid' } 
+ Thu Feb 01 2018 11:25:10 GMT+0200 (GTB Standard Time)
+[debug] [2018-02-01T09:25:11.100Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-01T09:25:11.107Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/weather-pwa-507f4  
+  
+ Thu Feb 01 2018 11:25:11 GMT+0200 (GTB Standard Time)
+[debug] [2018-02-01T09:25:12.010Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-01T09:25:12.011Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/weather-pwa-507f4/tokens  
+  
+ Thu Feb 01 2018 11:25:12 GMT+0200 (GTB Standard Time)
+[debug] [2018-02-01T09:25:12.690Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Serving from 'C:\Users\ancas\web\weather'...
+[info] 
+[debug] [2018-02-01T09:25:12.695Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/weather-pwa-507f4  
+  
+ Thu Feb 01 2018 11:25:12 GMT+0200 (GTB Standard Time)
+[debug] [2018-02-01T09:25:13.574Z] <<< HTTP RESPONSE 200
+[debug] [2018-02-01T09:25:13.575Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/112467213206/clients/_:getWebAppConfig  
+  
+ Thu Feb 01 2018 11:25:13 GMT+0200 (GTB Standard Time)
+[debug] [2018-02-01T09:25:14.119Z] <<< HTTP RESPONSE 200
+[info] i  hosting: Serving hosting files from: app
+[info] +  hosting: Local server: http://localhost:5000
+
+[info] Shutting down...
