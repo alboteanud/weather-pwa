@@ -108,7 +108,7 @@
     card.querySelector('.current .humidity').textContent =
       Math.round(data.main.humidity) + '%';
     card.querySelector('.current .wind .value').textContent =
-      Math.round(data.wind.speed);
+      Math.round(data.wind.speed*2.237); //mph
     card.querySelector('.current .wind .direction').textContent = data.wind.deg;
  
     // var nextDays = card.querySelectorAll('.future .oneday');
