@@ -91,7 +91,7 @@
       }
     }
  
-    var localeDate = 'ro-RO';
+    var localeDate = 'en-US';
     cardLastUpdatedElem.textContent = new Date(data.dt*1000);
     card.querySelector('.description').textContent = data.weather[0].description;
     card.querySelector('.date').textContent = new Date(data.dt*1000)
@@ -108,7 +108,7 @@
     card.querySelector('.current .humidity').textContent =
       Math.round(data.main.humidity) + '%';
     card.querySelector('.current .wind .value').textContent =
-      Math.round(data.wind.speed*2.237); //mph
+      Math.round(data.wind.speed); //mph
     card.querySelector('.current .wind .direction').textContent = data.wind.deg;
  
     // var nextDays = card.querySelectorAll('.future .oneday');
@@ -145,7 +145,7 @@
   app.getWeatherNowOWM = function(key) {
     var url = 'http://api.openweathermap.org/data/2.5/weather?mode=json' 
     + '&id=' + key
-    + '&units=metric' 
+    + '&units=imperial' 
     + '&lang=en'
     + '&APPID=' + 'd53bff8f3256eaf090be3c94964b0cb8';
     // http://api.openweathermap.org/data/2.5/weather?mode=json&id=680332&units=metric&lang=en&APPID=d53bff8f3256eaf090be3c94964b0cb8
@@ -268,47 +268,60 @@
    * discussion.
    */
   var initialWeatherForecast = {
-      "coord": {
-      "lon": 23.8,
-      "lat": 44.32
-      },
-      "weather": [
-      {
-      "id": 800,
-      "main": "Clear",
-      "description": "clear sky",
-      "icon": "01d"
-      }
-      ],
-      "base": "stations",
-      "main": {
-      "temp": 7,
-      "pressure": 1015,
-      "humidity": 56,
-      "temp_min": 7,
-      "temp_max": 7
-      },
-      "visibility": 10000,
-      "wind": {
-      "speed": 2.6,
-      "deg": 160
-      },
-      "clouds": {
-      "all": 0
-      },
-      "dt": 1517481000,
-      "sys": {
-      "type": 1,
-      "id": 5991,
-      "message": 0.0036,
-      "country": "RO",
-      "sunrise": 1517463761,
-      "sunset": 1517499282
-      },
-      "id": 680332,
-      "name": "Craiova",
-      "cod": 200
-      };
+    "coord": {
+    "lon": -74.01,
+    "lat": 40.71
+    },
+    "weather": [
+    {
+    "id": 500,
+    "main": "Rain",
+    "description": "light rain",
+    "icon": "10n"
+    },
+    {
+    "id": 600,
+    "main": "Snow",
+    "description": "light snow",
+    "icon": "13n"
+    },
+    {
+    "id": 701,
+    "main": "Mist",
+    "description": "mist",
+    "icon": "50n"
+    }
+    ],
+    "base": "stations",
+    "main": {
+    "temp": 34.86,
+    "pressure": 1012,
+    "humidity": 80,
+    "temp_min": 32,
+    "temp_max": 37.4
+    },
+    "visibility": 16093,
+    "wind": {
+    "speed": 19.46,
+    "deg": 340,
+    "gust": 11.3
+    },
+    "clouds": {
+    "all": 90
+    },
+    "dt": 1517566500,
+    "sys": {
+    "type": 1,
+    "id": 1969,
+    "message": 0.0038,
+    "country": "US",
+    "sunrise": 1517573074,
+    "sunset": 1517609732
+    },
+    "id": 5128581,
+    "name": "New York",
+    "cod": 200
+    };
 
   // TODO uncomment line below to test app with fake data
   // app.updateForecastCard(initialWeatherForecast);
