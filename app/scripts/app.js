@@ -68,7 +68,7 @@
   // Updates a weather card with the latest weather forecast. If the card
   // doesn't already exist, it's cloned from the template.
   app.updateForecastCard = function(data) {
-    var card = app.visibleCards[data.key];
+    var card = app.visibleCards[data.id];
     if (!card) {
       card = app.cardTemplate.cloneNode(true);
       card.classList.remove('cardTemplate');
@@ -78,6 +78,8 @@
       app.visibleCards[data.id] = card;
     }
 
+    // update current weather
+    if(data.weather){ 
     // Verifies the data provide is newer than what's already visible
     // on the card, if it's not bail, if it is, continue and update the
     // time saved in the card
@@ -92,7 +94,7 @@
     }
  
     var localeDate = 'en-US';
-    cardLastUpdatedElem.textContent = new Date(data.dt*1000);
+    cardLastUpdatedElem.textContent = new Date(data.dt);
     card.querySelector('.description').textContent = data.weather[0].description;
     card.querySelector('.date').textContent = new Date(data.dt*1000)
     .toLocaleDateString(localeDate, { weekday: 'short', month: 'short', day: 'numeric' });
@@ -110,23 +112,26 @@
     card.querySelector('.current .wind .value').textContent =
       Math.round(data.wind.speed); //mph
     card.querySelector('.current .wind .direction').textContent = data.wind.deg;
- 
-    // var nextDays = card.querySelectorAll('.future .oneday');
-    // var today = new Date();
-    // today = today.getDay();
-    // for (var i = 0; i < 7; i++) {
-    //   var nextDay = nextDays[i];
-    //   var daily = data.channel.item.forecast[i];
-    //   if (daily && nextDay) {
-    //     nextDay.querySelector('.date').textContent =
-    //       app.daysOfWeek[(i + today) % 7];
-    //     nextDay.querySelector('.icon').classList.add(app.getIconClass(daily.code));
-    //     nextDay.querySelector('.temp-high .value').textContent =
-    //       Math.round(daily.high);
-    //     nextDay.querySelector('.temp-low .value').textContent =
-    //       Math.round(daily.low);
-    //   }
-    // }
+  } // END update current weather
+
+  else if(data.cnt){ // weather forecast
+    var nextDays = card.querySelectorAll('.future .oneday');
+    var today = new Date();
+    today = today.getDay();
+    for (var i = 0; i < 7; i++) {
+      var nextDay = nextDays[i];
+      var daily = data.list[i];
+      if (daily && nextDay) {
+        nextDay.querySelector('.date').textContent =
+          app.daysOfWeek[(i + today) % 7];
+        nextDay.querySelector('.icon').classList.add(app.getIconClass(daily.weather[0].icon));
+        nextDay.querySelector('.temp-high .value').textContent =
+          Math.round(daily.temp.max);
+        nextDay.querySelector('.temp-low .value').textContent =
+          Math.round(daily.temp.min);
+      }
+    }
+  } // END weather forecast
 
     if (app.isLoading) {
       app.spinner.setAttribute('hidden', true);
@@ -143,14 +148,25 @@
    ****************************************************************************/
 
   app.getWeatherNowOWM = function(key) {
+    const unitsType = 'imperial';
+    const langRequest = 'en';
+    const myAPPID = 'd53bff8f3256eaf090be3c94964b0cb8';
+
     var url = 'http://api.openweathermap.org/data/2.5/weather?mode=json' 
     + '&id=' + key
-    + '&units=imperial' 
-    + '&lang=en'
-    + '&APPID=' + 'd53bff8f3256eaf090be3c94964b0cb8';
+    + '&units=' + unitsType
+    + '&lang=' + langRequest
+    + '&APPID=' + myAPPID;
     // http://api.openweathermap.org/data/2.5/weather?mode=json&id=680332&units=metric&lang=en&APPID=d53bff8f3256eaf090be3c94964b0cb8
     // https://query.yahooapis.com/v1/public/yql?format=json&q=select%20*%20from%20weather.forecast%20where%20woeid=2459115
 
+var url_forecast = 'http://api.openweathermap.org/data/2.5/forecast/daily?mode=json'
++ '&id=' + key
++ '&units=' + unitsType
++ 'cnt=' + '7'
++ '&lang=' + langRequest
++ '&APPID=' + myAPPID;
+    // http://api.openweathermap.org/data/2.5/forecast/daily?id=5128581&mode=json&units=metric&cnt=14&lang=en&APPID=d53bff8f3256eaf090be3c94964b0cb8
 
     // TODO add cache logic here
     if ('caches' in window) {
@@ -164,6 +180,12 @@
           response.json().then( app.updateForecastCard(results) );
         }
       });
+      caches.match(url_forecast).then(function(response) {
+        if (response) {
+          response.json().then( app.updateForecastCard(results) );
+        }
+      });
+
     }
     // Fetch the latest data.
     var request = new XMLHttpRequest();
@@ -171,16 +193,34 @@
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
           var results = JSON.parse(request.response);
-          results.created = results.dt;
+          // results.created = results.dt;
           app.updateForecastCard(results);
         }
       } else {
         // Return the initial weather forecast since no data is available.
-        app.updateForecastCard(initialWeatherForecast);
+        app.updateForecastCard(initialWeatherCurrent);
       }
     };
     request.open('GET', url);
     request.send();
+
+ // Fetch the latest FORECAST data.
+ var request_forecast = new XMLHttpRequest();
+ request_forecast.onreadystatechange = function() {
+   if (request_forecast.readyState === XMLHttpRequest.DONE) {
+     if (request_forecast.status === 200) {
+       var results = JSON.parse(request_forecast.response);
+       // results.created = results.dt;
+       app.updateForecastCard(results);
+     }
+   } else {
+     // Return the initial weather forecast since no data is available.
+     app.updateForecastCard(initialWeatherForecast);
+   }
+ };
+ request_forecast.open('GET', url_forecast);
+ request_forecast.send();
+
   };
 
   // Iterate all of the cards and attempt to get the latest forecast data
@@ -267,7 +307,7 @@
    * or when the user has not saved any cities. See startup code for more
    * discussion.
    */
-  var initialWeatherForecast = {
+  var initialWeatherCurrent = {
     "coord": {
     "lon": -74.01,
     "lat": 40.71
@@ -278,18 +318,6 @@
     "main": "Rain",
     "description": "light rain",
     "icon": "10n"
-    },
-    {
-    "id": 600,
-    "main": "Snow",
-    "description": "light snow",
-    "icon": "13n"
-    },
-    {
-    "id": 701,
-    "main": "Mist",
-    "description": "mist",
-    "icon": "50n"
     }
     ],
     "base": "stations",
@@ -306,9 +334,6 @@
     "deg": 340,
     "gust": 11.3
     },
-    "clouds": {
-    "all": 90
-    },
     "dt": 1517566500,
     "sys": {
     "type": 1,
@@ -322,6 +347,204 @@
     "name": "New York",
     "cod": 200
     };
+
+    // var requestJsonForecast = new XMLHttpRequest();
+    // requestJsonForecast.open("GET", "initialWeatherForecast.json", false);
+    // requestJsonForecast.send(null)
+    // var initialWeatherForecast = JSON.parse(requestJsonForecast.responseText)[0];
+    var initialWeatherForecast = {
+      "city": {
+      "id": 5128581,
+      "name": "New York",
+      "coord": {
+      "lon": -74.006,
+      "lat": 40.7143
+      },
+      "country": "US",
+      "population": 0
+      },
+      "cod": "200",
+      "message": 0.0848743,
+      "cnt": 7,
+      "list": [
+      {
+      "dt": 1517590800,
+      "temp": {
+      "day": -4.8,
+      "min": -8.15,
+      "max": -3,
+      "night": -8.15,
+      "eve": -6.42,
+      "morn": -3
+      },
+      "pressure": 1026.9,
+      "humidity": 100,
+      "weather": [
+      {
+      "id": 600,
+      "main": "Snow",
+      "description": "light snow",
+      "icon": "13d"
+      }
+      ],
+      "speed": 6.32,
+      "deg": 306,
+      "clouds": 12,
+      "rain": 0.27,
+      "snow": 0.37
+      },
+      {
+      "dt": 1517677200,
+      "temp": {
+      "day": -3.75,
+      "min": -8.98,
+      "max": -2.32,
+      "night": -2.89,
+      "eve": -3.38,
+      "morn": -8.98
+      },
+      "pressure": 1038.44,
+      "humidity": 100,
+      "weather": [
+      {
+      "id": 800,
+      "main": "Clear",
+      "description": "sky is clear",
+      "icon": "01d"
+      }
+      ],
+      "speed": 3.91,
+      "deg": 231,
+      "clouds": 0
+      },
+      {
+      "dt": 1517763600,
+      "temp": {
+      "day": 1.73,
+      "min": -4.28,
+      "max": 1.73,
+      "night": -4.28,
+      "eve": 0.71,
+      "morn": -0.88
+      },
+      "pressure": 1030.41,
+      "humidity": 88,
+      "weather": [
+      {
+      "id": 601,
+      "main": "Snow",
+      "description": "snow",
+      "icon": "13d"
+      }
+      ],
+      "speed": 3.77,
+      "deg": 209,
+      "clouds": 92,
+      "rain": 0.69,
+      "snow": 4.46
+      },
+      {
+      "dt": 1517850000,
+      "temp": {
+      "day": 3.31,
+      "min": -6.6,
+      "max": 3.31,
+      "night": -6.6,
+      "eve": -2.99,
+      "morn": -5.35
+      },
+      "pressure": 1018.46,
+      "humidity": 0,
+      "weather": [
+      {
+      "id": 500,
+      "main": "Rain",
+      "description": "light rain",
+      "icon": "10d"
+      }
+      ],
+      "speed": 3.44,
+      "deg": 320,
+      "clouds": 22
+      },
+      {
+      "dt": 1517936400,
+      "temp": {
+      "day": 1.77,
+      "min": -2.98,
+      "max": 2.75,
+      "night": 2.72,
+      "eve": 2.75,
+      "morn": -2.98
+      },
+      "pressure": 1024.63,
+      "humidity": 0,
+      "weather": [
+      {
+      "id": 601,
+      "main": "Snow",
+      "description": "snow",
+      "icon": "13d"
+      }
+      ],
+      "speed": 2.07,
+      "deg": 160,
+      "clouds": 100,
+      "rain": 12.05,
+      "snow": 3.87
+      },
+      {
+      "dt": 1518022800,
+      "temp": {
+      "day": 1.9,
+      "min": -2.75,
+      "max": 2.46,
+      "night": -2.75,
+      "eve": 0.82,
+      "morn": 2.46
+      },
+      "pressure": 1013.94,
+      "humidity": 0,
+      "weather": [
+      {
+      "id": 502,
+      "main": "Rain",
+      "description": "heavy intensity rain",
+      "icon": "10d"
+      }
+      ],
+      "speed": 4.06,
+      "deg": 5,
+      "clouds": 100,
+      "rain": 20.85
+      },
+      {
+      "dt": 1518109200,
+      "temp": {
+      "day": -2.44,
+      "min": -7.17,
+      "max": -2.44,
+      "night": -7.17,
+      "eve": -3.68,
+      "morn": -3.24
+      },
+      "pressure": 1022.46,
+      "humidity": 0,
+      "weather": [
+      {
+      "id": 601,
+      "main": "Snow",
+      "description": "snow",
+      "icon": "13d"
+      }
+      ],
+      "speed": 3.01,
+      "deg": 356,
+      "clouds": 100,
+      "snow": 5.69
+      }
+      ]
+      };
 
   // TODO uncomment line below to test app with fake data
   // app.updateForecastCard(initialWeatherForecast);
