@@ -14,7 +14,7 @@
 
 
   /*****************************************************************************
-   *
+   *test
    * Event listeners for UI elements
    *
    ****************************************************************************/
@@ -166,7 +166,7 @@
     const langRequest = 'en';
     const myAPPID = 'd53bff8f3256eaf090be3c94964b0cb8';
 
-    var url = 'http://api.openweathermap.org/data/2.5/weather?mode=json'
+    var url = 'https://api.openweathermap.org/data/2.5/weather?mode=json'
       + '&id=' + key
       + '&units=' + unitsType
       + '&lang=' + langRequest
@@ -211,7 +211,7 @@
     const langRequest = 'en';
     const myAPPID = 'd53bff8f3256eaf090be3c94964b0cb8';
 
-    var url_forecast = 'http://api.openweathermap.org/data/2.5/forecast/daily?mode=json'
+    var url_forecast = 'https://api.openweathermap.org/data/2.5/forecast/daily?mode=json'
       + '&id=' + key
       + '&units=' + unitsType
       + '&cnt=' + '7'
