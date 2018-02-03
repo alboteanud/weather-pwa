@@ -14,7 +14,7 @@
 
 
   /*****************************************************************************
-   *test
+   *
    * Event listeners for UI elements
    *
    ****************************************************************************/
@@ -91,26 +91,28 @@
         }
       }
 
-      var localeDate = 'en-US';
+      var locale = 'en-US';
+      var offsetCityMills = -5 * 3600 * 1000;   // NewYork delay to UTC 
+      var offsetDeviceMills =  new Date().getTimezoneOffset() * 60 * 1000 ;
+
       cardLastUpdatedElem.textContent = new Date(data.dt*1000);
       card.querySelector('.description').textContent = data.weather[0].description;
-      card.querySelector('.date').textContent = new Date(data.dt * 1000)
-        .toLocaleDateString(localeDate, { weekday: 'short', month: 'short', day: 'numeric' });
+      card.querySelector('.date').textContent = new Date()
+        .toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
         var iconCode = data.weather[0].icon;
       card.querySelector('.current .icon').classList.add(app.getIconClass(iconCode));
       card.querySelector('.current .temperature .value').textContent =
         Math.round(data.main.temp);
-      var optionsDate = { hour: 'numeric', minute: 'numeric', weekday: 'narrow' };
-      card.querySelector('.current .sunrise').textContent = new Date(data.sys.sunrise * 1000)
-        // .format('HH:m');
-        .toLocaleDateString(localeDate, optionsDate);
-      card.querySelector('.current .sunset').textContent = new Date(data.sys.sunset * 1000)
-        .toLocaleDateString(localeDate, optionsDate);
+      var options = { hour: 'numeric', minute: 'numeric' };
+      card.querySelector('.current .sunrise').textContent = new Date(data.sys.sunrise * 1000 + offsetCityMills + offsetDeviceMills) 
+        .toLocaleTimeString(locale, options);
+      card.querySelector('.current .sunset').textContent = new Date(data.sys.sunset * 1000 + offsetCityMills + offsetDeviceMills)
+        .toLocaleTimeString(locale, options);
       card.querySelector('.current .humidity').textContent =
         Math.round(data.main.humidity) + '%';
       card.querySelector('.current .wind .value').textContent =
         Math.round(data.wind.speed); //mph
-      card.querySelector('.current .wind .direction').textContent = data.wind.deg;
+      card.querySelector('.current .wind .direction').textContent = app.getWindDirection(data.wind.deg);
 
     if (app.isLoading) {
       app.spinner.setAttribute('hidden', true);
@@ -351,6 +353,26 @@
     }
   };
 
+  app.getWindDirection = function(degrees){
+    if (degrees >= 337.5 || degrees < 22.5) {
+        return 'N';                                     //N
+    } else if (degrees >= 22.5 && degrees < 67.5) {
+       return 'NE';
+    } else if (degrees >= 67.5 && degrees < 112.5) {
+        return 'E';                                     //"E";
+    } else if (degrees >= 112.5 && degrees < 157.5) {
+        return 'SE';     //"SE";
+    } else if (degrees >= 157.5 && degrees < 202.5) {
+      return 'S';                                     //"S";
+    } else if (degrees >= 202.5 && degrees < 247.5) {
+      return 'SW';    //"SW";
+    } else if (degrees >= 247.5 && degrees < 292.5) {
+      return 'W';                                 //"W";
+    } else if (degrees >= 292.5 && degrees < 337.5) {
+      return 'NW';         //"NW";
+    }
+}
+
   /*
    * Fake weather data that is presented when the user first uses the app,
    * or when the user has not saved any cities. See startup code for more
@@ -401,199 +423,372 @@
   // requestJsonForecast.open("GET", "initialWeatherForecast.json", false);
   // requestJsonForecast.send(null)
   // var initialWeatherForecast = JSON.parse(requestJsonForecast.responseText)[0];
+  //  http://api.openweathermap.org/data/2.5/forecast/daily?id=5128581&mode=json&units=imperial&cnt=14&lang=en&APPID=d53bff8f3256eaf090be3c94964b0cb8
   var initialWeatherForecast = {
     "city": {
-      "id": 5128581,
-      "name": "New York",
-      "coord": {
-        "lon": -74.006,
-        "lat": 40.7143
-      },
-      "country": "US",
-      "population": 0
+    "id": 5128581,
+    "name": "New York",
+    "coord": {
+    "lon": -74.006,
+    "lat": 40.7143
+    },
+    "country": "US",
+    "population": 0
     },
     "cod": "200",
-    "message": 0.0848743,
-    "cnt": 7,
+    "message": 0.1105234,
+    "cnt": 14,
     "list": [
-      {
-        "dt": 1517590800,
-        "temp": {
-          "day": -4.8,
-          "min": -8.15,
-          "max": -3,
-          "night": -8.15,
-          "eve": -6.42,
-          "morn": -3
-        },
-        "pressure": 1026.9,
-        "humidity": 100,
-        "weather": [
-          {
-            "id": 600,
-            "main": "Snow",
-            "description": "light snow",
-            "icon": "13d"
-          }
-        ],
-        "speed": 6.32,
-        "deg": 306,
-        "clouds": 12,
-        "rain": 0.27,
-        "snow": 0.37
-      },
-      {
-        "dt": 1517677200,
-        "temp": {
-          "day": -3.75,
-          "min": -8.98,
-          "max": -2.32,
-          "night": -2.89,
-          "eve": -3.38,
-          "morn": -8.98
-        },
-        "pressure": 1038.44,
-        "humidity": 100,
-        "weather": [
-          {
-            "id": 800,
-            "main": "Clear",
-            "description": "sky is clear",
-            "icon": "01d"
-          }
-        ],
-        "speed": 3.91,
-        "deg": 231,
-        "clouds": 0
-      },
-      {
-        "dt": 1517763600,
-        "temp": {
-          "day": 1.73,
-          "min": -4.28,
-          "max": 1.73,
-          "night": -4.28,
-          "eve": 0.71,
-          "morn": -0.88
-        },
-        "pressure": 1030.41,
-        "humidity": 88,
-        "weather": [
-          {
-            "id": 601,
-            "main": "Snow",
-            "description": "snow",
-            "icon": "13d"
-          }
-        ],
-        "speed": 3.77,
-        "deg": 209,
-        "clouds": 92,
-        "rain": 0.69,
-        "snow": 4.46
-      },
-      {
-        "dt": 1517850000,
-        "temp": {
-          "day": 3.31,
-          "min": -6.6,
-          "max": 3.31,
-          "night": -6.6,
-          "eve": -2.99,
-          "morn": -5.35
-        },
-        "pressure": 1018.46,
-        "humidity": 0,
-        "weather": [
-          {
-            "id": 500,
-            "main": "Rain",
-            "description": "light rain",
-            "icon": "10d"
-          }
-        ],
-        "speed": 3.44,
-        "deg": 320,
-        "clouds": 22
-      },
-      {
-        "dt": 1517936400,
-        "temp": {
-          "day": 1.77,
-          "min": -2.98,
-          "max": 2.75,
-          "night": 2.72,
-          "eve": 2.75,
-          "morn": -2.98
-        },
-        "pressure": 1024.63,
-        "humidity": 0,
-        "weather": [
-          {
-            "id": 601,
-            "main": "Snow",
-            "description": "snow",
-            "icon": "13d"
-          }
-        ],
-        "speed": 2.07,
-        "deg": 160,
-        "clouds": 100,
-        "rain": 12.05,
-        "snow": 3.87
-      },
-      {
-        "dt": 1518022800,
-        "temp": {
-          "day": 1.9,
-          "min": -2.75,
-          "max": 2.46,
-          "night": -2.75,
-          "eve": 0.82,
-          "morn": 2.46
-        },
-        "pressure": 1013.94,
-        "humidity": 0,
-        "weather": [
-          {
-            "id": 502,
-            "main": "Rain",
-            "description": "heavy intensity rain",
-            "icon": "10d"
-          }
-        ],
-        "speed": 4.06,
-        "deg": 5,
-        "clouds": 100,
-        "rain": 20.85
-      },
-      {
-        "dt": 1518109200,
-        "temp": {
-          "day": -2.44,
-          "min": -7.17,
-          "max": -2.44,
-          "night": -7.17,
-          "eve": -3.68,
-          "morn": -3.24
-        },
-        "pressure": 1022.46,
-        "humidity": 0,
-        "weather": [
-          {
-            "id": 601,
-            "main": "Snow",
-            "description": "snow",
-            "icon": "13d"
-          }
-        ],
-        "speed": 3.01,
-        "deg": 356,
-        "clouds": 100,
-        "snow": 5.69
-      }
+    {
+    "dt": 1517590800,
+    "temp": {
+    "day": 15.19,
+    "min": 15.19,
+    "max": 15.19,
+    "night": 15.19,
+    "eve": 15.19,
+    "morn": 15.19
+    },
+    "pressure": 1037.38,
+    "humidity": 100,
+    "weather": [
+    {
+    "id": 800,
+    "main": "Clear",
+    "description": "sky is clear",
+    "icon": "01n"
+    }
+    ],
+    "speed": 9.53,
+    "deg": 303,
+    "clouds": 0
+    },
+    {
+    "dt": 1517677200,
+    "temp": {
+    "day": 24.82,
+    "min": 14.54,
+    "max": 27.82,
+    "night": 26.8,
+    "eve": 25.93,
+    "morn": 14.54
+    },
+    "pressure": 1038.44,
+    "humidity": 100,
+    "weather": [
+    {
+    "id": 800,
+    "main": "Clear",
+    "description": "sky is clear",
+    "icon": "01d"
+    }
+    ],
+    "speed": 8.75,
+    "deg": 231,
+    "clouds": 0
+    },
+    {
+    "dt": 1517763600,
+    "temp": {
+    "day": 35.11,
+    "min": 24.3,
+    "max": 35.11,
+    "night": 24.3,
+    "eve": 33.28,
+    "morn": 30.43
+    },
+    "pressure": 1030.41,
+    "humidity": 88,
+    "weather": [
+    {
+    "id": 601,
+    "main": "Snow",
+    "description": "snow",
+    "icon": "13d"
+    }
+    ],
+    "speed": 8.43,
+    "deg": 209,
+    "clouds": 92,
+    "rain": 0.69,
+    "snow": 4.46
+    },
+    {
+    "dt": 1517850000,
+    "temp": {
+    "day": 27.77,
+    "min": 20.93,
+    "max": 27.77,
+    "night": 21.34,
+    "eve": 25.29,
+    "morn": 20.93
+    },
+    "pressure": 1025.52,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 800,
+    "main": "Clear",
+    "description": "sky is clear",
+    "icon": "01d"
+    }
+    ],
+    "speed": 7.49,
+    "deg": 283,
+    "clouds": 0
+    },
+    {
+    "dt": 1517936400,
+    "temp": {
+    "day": 34.39,
+    "min": 25.16,
+    "max": 34.39,
+    "night": 34.39,
+    "eve": 34.05,
+    "morn": 25.16
+    },
+    "pressure": 1032.21,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 600,
+    "main": "Snow",
+    "description": "light snow",
+    "icon": "13d"
+    }
+    ],
+    "speed": 6.4,
+    "deg": 185,
+    "clouds": 91,
+    "rain": 5.39,
+    "snow": 0.68
+    },
+    {
+    "dt": 1518022800,
+    "temp": {
+    "day": 52.93,
+    "min": 31.33,
+    "max": 52.93,
+    "night": 31.33,
+    "eve": 44.96,
+    "morn": 39.34
+    },
+    "pressure": 1010.29,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 502,
+    "main": "Rain",
+    "description": "heavy intensity rain",
+    "icon": "10d"
+    }
+    ],
+    "speed": 13.94,
+    "deg": 194,
+    "clouds": 100,
+    "rain": 28.88
+    },
+    {
+    "dt": 1518109200,
+    "temp": {
+    "day": 27.68,
+    "min": 22.86,
+    "max": 27.68,
+    "night": 22.86,
+    "eve": 25.41,
+    "morn": 26.82
+    },
+    "pressure": 1033.88,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 601,
+    "main": "Snow",
+    "description": "snow",
+    "icon": "13d"
+    }
+    ],
+    "speed": 7.83,
+    "deg": 5,
+    "clouds": 100,
+    "snow": 9.15
+    },
+    {
+    "dt": 1518195600,
+    "temp": {
+    "day": 27.19,
+    "min": 17.46,
+    "max": 33.28,
+    "night": 33.28,
+    "eve": 30.78,
+    "morn": 17.46
+    },
+    "pressure": 1041.54,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 600,
+    "main": "Snow",
+    "description": "light snow",
+    "icon": "13d"
+    }
+    ],
+    "speed": 7.74,
+    "deg": 59,
+    "clouds": 83,
+    "rain": 6.73,
+    "snow": 0.09
+    },
+    {
+    "dt": 1518282000,
+    "temp": {
+    "day": 38.77,
+    "min": 32.49,
+    "max": 38.77,
+    "night": 35.62,
+    "eve": 37.02,
+    "morn": 32.49
+    },
+    "pressure": 1031.52,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 500,
+    "main": "Rain",
+    "description": "light rain",
+    "icon": "10d"
+    }
+    ],
+    "speed": 2.64,
+    "deg": 19,
+    "clouds": 78,
+    "rain": 1.93
+    },
+    {
+    "dt": 1518368400,
+    "temp": {
+    "day": 45.43,
+    "min": 35.96,
+    "max": 45.43,
+    "night": 40.1,
+    "eve": 44.38,
+    "morn": 35.96
+    },
+    "pressure": 1023.75,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 501,
+    "main": "Rain",
+    "description": "moderate rain",
+    "icon": "10d"
+    }
+    ],
+    "speed": 3.6,
+    "deg": 204,
+    "clouds": 100,
+    "rain": 3.13
+    },
+    {
+    "dt": 1518454800,
+    "temp": {
+    "day": 43.97,
+    "min": 35.82,
+    "max": 43.97,
+    "night": 39.4,
+    "eve": 40.23,
+    "morn": 35.82
+    },
+    "pressure": 1029.63,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 501,
+    "main": "Rain",
+    "description": "moderate rain",
+    "icon": "10d"
+    }
+    ],
+    "speed": 4.68,
+    "deg": 79,
+    "clouds": 97,
+    "rain": 8.83
+    },
+    {
+    "dt": 1518541200,
+    "temp": {
+    "day": 59.23,
+    "min": 41.25,
+    "max": 59.23,
+    "night": 41.25,
+    "eve": 55.71,
+    "morn": 49.51
+    },
+    "pressure": 1012.51,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 500,
+    "main": "Rain",
+    "description": "light rain",
+    "icon": "10d"
+    }
+    ],
+    "speed": 8.14,
+    "deg": 248,
+    "clouds": 87,
+    "rain": 2.4
+    },
+    {
+    "dt": 1518627600,
+    "temp": {
+    "day": 33.51,
+    "min": 20.89,
+    "max": 33.51,
+    "night": 20.89,
+    "eve": 28.27,
+    "morn": 32.18
+    },
+    "pressure": 1025.77,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 800,
+    "main": "Clear",
+    "description": "sky is clear",
+    "icon": "01d"
+    }
+    ],
+    "speed": 7,
+    "deg": 351,
+    "clouds": 23
+    },
+    {
+    "dt": 1518714000,
+    "temp": {
+    "day": 30.97,
+    "min": 17.55,
+    "max": 30.97,
+    "night": 25.05,
+    "eve": 29.03,
+    "morn": 17.55
+    },
+    "pressure": 1029.42,
+    "humidity": 0,
+    "weather": [
+    {
+    "id": 800,
+    "main": "Clear",
+    "description": "sky is clear",
+    "icon": "01d"
+    }
+    ],
+    "speed": 5.1,
+    "deg": 289,
+    "clouds": 1
+    }
     ]
-  };
+    };
 
   // TODO uncomment line below to test app with fake data
   // app.updateForecastCard(initialWeatherForecast);
